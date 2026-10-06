@@ -1,0 +1,6 @@
+# lista local de termos proibidos (fica fora do git)
+.sanitize-blocklist
+__pycache__/
+*.pyc
+.DS_Store
+~$*

@@ -1,0 +1,15 @@
+{
+  "name": "models-equity-br",
+  "description": "Skills de modelos de equity para empresas brasileiras listadas (Claude Code).",
+  "owner": {
+    "name": "models-equity-br"
+  },
+  "plugins": [
+    {
+      "name": "models-equity-br",
+      "source": "./plugins/models-equity-br",
+      "description": "Skills para construir e auditar modelos de equity (Excel com fórmulas vivas) de empresas brasileiras listadas: genérico e infraestrutura/utilities.",
+      "version": "1.0.0"
+    }
+  ]
+}

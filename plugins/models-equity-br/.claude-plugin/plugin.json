@@ -1,0 +1,5 @@
+{
+  "name": "models-equity-br",
+  "description": "Skills para construir e auditar modelos de equity (Excel com fórmulas vivas) de empresas brasileiras listadas: br-equity-model-builder (genérico) e br-infra-equity-model (infraestrutura e utilities).",
+  "version": "1.0.0"
+}
