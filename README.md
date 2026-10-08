@@ -1,138 +1,144 @@
 # models-equity-br
 
-Skills do **Claude Code** para construir e auditar modelos de equity, em Excel com
-fórmulas vivas, de empresas brasileiras listadas.
+**Claude Code** skills to build and audit equity models, in Excel with live formulas,
+for Brazilian listed companies.
 
-| Skill | Para quê |
+| Skill | Use it for |
 |---|---|
-| `br-equity-model-builder` | Qualquer empresa brasileira listada (exceto infraestrutura/utilities). |
-| `br-infra-equity-model` | Infraestrutura e utilities: geração, transmissão, distribuição, comercialização. |
+| `br-equity-model-builder` | Any Brazilian listed company (except infrastructure/utilities). |
+| `br-infra-equity-model` | Infrastructure and utilities: generation, transmission, distribution, energy trading. |
 
-O Claude Code escolhe a skill sozinho pelo pedido ("monta o modelo da TAEE11",
-"audita este modelo: <caminho do arquivo>"). As duas seguem o mesmo método: coleta de
-fontes com hierarquia, perguntas de premissas com default sugerido, aprovação explícita
-antes de escrever código, projeção por driver, TIR real (Fisher) contra NTN-B longa e um
-gate de verificação (recálculo no LibreOffice com zero erros de fórmula) antes de
-qualquer entrega.
+Claude Code picks the right skill from the request ("build the model for TAEE11",
+"audit this model: <file path>"). Both follow the same method: a source hierarchy for
+data collection, assumption questions with a suggested default for each, explicit
+approval before any code is written, driver-based projections, real IRR (Fisher)
+against the long NTN-B, and a verification gate (LibreOffice recalculation with zero
+formula errors) before anything is delivered.
 
-## Requisitos
+The skills' instructions are written in Portuguese, and Claude answers in Portuguese by
+default.
 
-- [Claude Code](https://code.claude.com) (as skills não foram feitas para o chat do claude.ai).
-- Python 3.8+ com `openpyxl` (`pip install openpyxl`).
-- [LibreOffice](https://www.libreoffice.org/download/), para recalcular e verificar os modelos.
-- `pdftotext` (pacote Poppler), para ler releases e DFs em PDF.
-- Opcional, só para baixar documentos de RI automaticamente:
-  `pip install selenium requests` e o Google Chrome.
+## Requirements
 
-Na primeira rodada a skill confere tudo isso e diz o que falta.
+- [Claude Code](https://code.claude.com). The skills are not designed for the claude.ai chat.
+- Python 3.8+ with `openpyxl` (`pip install openpyxl`).
+- [LibreOffice](https://www.libreoffice.org/download/), to recalculate and verify models.
+- `pdftotext` (Poppler package), to read earnings releases and financial statements in PDF.
+- Optional, only to download investor-relations documents automatically:
+  `pip install selenium requests` and Google Chrome.
 
-## Instalação
+On the first run the skill checks all of this and lists what is missing.
 
-1. Tenha acesso de leitura a este repositório no GitHub e o git autenticado na máquina
-   (por exemplo, `gh auth login`).
-2. No Claude Code:
+## Installation
+
+1. Get read access to this repository on GitHub and make sure git is authenticated on
+   your machine (for example, `gh auth login`).
+2. In Claude Code:
 
    ```
-   /plugin marketplace add <dono>/models-equity-br
+   /plugin marketplace add <owner>/models-equity-br
    /plugin install models-equity-br@models-equity-br
    ```
 
-   Troque `<dono>` pela conta ou organização do GitHub onde o repositório está.
+   Replace `<owner>` with the GitHub account or organization that hosts the repository.
 
-3. Para receber atualizações: `/plugin marketplace update models-equity-br`.
+3. To get updates: `/plugin marketplace update models-equity-br`.
 
-## Primeira rodada
+## First run
 
-Na primeira vez que uma das skills roda, ela avisa que foi feita para o Claude Code e
-cria um arquivo de configuração com três pastas:
+The first time either skill runs, it says it was built for Claude Code and creates a
+configuration file with three folders:
 
-| Campo | O que é |
+| Field | What it is |
 |---|---|
-| `pasta_ri` | Documentos de RI, uma subpasta por empresa (releases, ITR/DFP, apresentações). O importador de RI salva aqui. |
-| `pasta_fundamentos` | Planilhas de fundamentos / dados históricos (opcional). |
-| `pasta_saida` | Onde os modelos são salvos. |
+| `pasta_ri` | Investor-relations documents, one subfolder per company (releases, ITR/DFP, presentations). The IR importer saves here. |
+| `pasta_fundamentos` | Fundamentals / historical data spreadsheets (optional). |
+| `pasta_saida` | Where models are saved. |
 
-O arquivo fica em `~/.claude/models-equity-br/config.json` e vale para as duas skills.
-Pastas sincronizadas (Google Drive, OneDrive, Dropbox) funcionam como qualquer pasta
-local. Para mudar depois: `/models-equity-br:configurar`, ou edite o arquivo. Para usar
-outro arquivo, defina a variável de ambiente `MODELS_EQUITY_BR_CONFIG`.
+The file lives at `~/.claude/models-equity-br/config.json` and is shared by both skills.
+Synced folders (Google Drive, OneDrive, Dropbox) work like any local folder. To change it
+later, run `/models-equity-br:configurar` or edit the file. To use a different file, set
+the `MODELS_EQUITY_BR_CONFIG` environment variable.
 
-## Como testar
+## Testing
 
-Para quem mantém o repositório, depois de clonar:
+For maintainers, after cloning:
 
 ```bash
-# 1. scripts: configuração, recálculo e verify_model (não mexe na sua configuração real)
+# 1. scripts: configuration, recalculation and verify_model (never touches your real configuration)
 python3 tools/smoke_test.py
 
-# 2. nada de nomes, caminhos ou metadados que impeçam compartilhar
+# 2. no names, paths or metadata that would prevent sharing
 python3 tools/check_sanitized.py
 
-# 3. manifests do plugin
+# 3. plugin manifests
 claude plugin validate .
 ```
 
-Para testar as skills de verdade sem instalar o plugin e sem tocar na sua configuração:
+To try the skills for real without installing the plugin and without touching your
+configuration:
 
 ```bash
 # macOS / Linux
-MODELS_EQUITY_BR_CONFIG=/tmp/teste/config.json claude --plugin-dir ./plugins/models-equity-br
+MODELS_EQUITY_BR_CONFIG=/tmp/test/config.json claude --plugin-dir ./plugins/models-equity-br
 ```
 
 ```powershell
 # Windows (PowerShell)
-$env:MODELS_EQUITY_BR_CONFIG="$env:TEMP\teste\config.json"; claude --plugin-dir .\plugins\models-equity-br
+$env:MODELS_EQUITY_BR_CONFIG="$env:TEMP\test\config.json"; claude --plugin-dir .\plugins\models-equity-br
 ```
 
-Roteiro sugerido dentro dessa sessão:
+Suggested script inside that session:
 
-1. **Primeira rodada:** peça "quero montar o modelo da TAEE11". Esperado: o aviso de que a
-   skill é para o Claude Code, as três perguntas de pasta, o arquivo criado e a lista de
-   dependências. Nenhuma pergunta sobre a empresa antes disso.
-2. **Segunda rodada:** feche, abra de novo com o mesmo comando e repita o pedido.
-   Esperado: não pergunta as pastas de novo.
-3. **Escolha da skill:** peça uma empresa não-infra (ex.: "modelo da LREN3"). Esperado:
-   `br-equity-model-builder`.
-4. **Auditoria:** "audita este modelo: <caminho de um modelo seu>". Esperado: modo
-   auditoria, sem perguntas de premissas.
-5. **Verificação:** rode `verify_model.py` num modelo já pronto:
-   `python3 plugins/models-equity-br/skills/br-infra-equity-model/scripts/verify_model.py <modelo.xlsx>`.
-   Ele recalcula o arquivo no LibreOffice e grava os valores nele, então use uma cópia.
-6. **Comando de configuração:** `/models-equity-br:configurar` mostra as pastas e deixa
-   trocar.
+1. **First run:** ask "build the model for TAEE11". Expected: the notice that the skill
+   is built for Claude Code, the three folder questions, the file being created and the
+   dependency list. No questions about the company before that.
+2. **Second run:** exit, start again with the same command and repeat the request.
+   Expected: it does not ask for the folders again.
+3. **Skill choice:** ask for a non-infrastructure company (e.g. "model for LREN3").
+   Expected: `br-equity-model-builder`.
+4. **Audit:** "audit this model: <path to one of your models>". Expected: audit mode,
+   with no assumption questions.
+5. **Verification:** run `verify_model.py` on a finished model:
+   `python3 plugins/models-equity-br/skills/br-infra-equity-model/scripts/verify_model.py <model.xlsx>`.
+   It recalculates the file in LibreOffice and writes the values back into it, so use a
+   copy.
+6. **Configuration command:** `/models-equity-br:configurar` shows the folders and lets
+   you change them.
 
-O teste mais forte é refazer um modelo que você já conhece e comparar os números.
+The strongest test is to rebuild a model you already know and compare the numbers.
 
-## Trava de sanitização
+## Sanitization check
 
-`tools/check_sanitized.py` roda no GitHub a cada push e falha se encontrar:
+`tools/check_sanitized.py` runs on GitHub on every push and fails if it finds:
 
-- caminhos absolutos de máquina ou de rede;
-- e-mails;
-- links externos e metadados de autor dentro de arquivos do Office;
-- cópias divergentes dos scripts compartilhados entre as skills;
-- os **termos proibidos** (nomes de empresa, pessoas etc.).
+- absolute machine or network paths;
+- email addresses;
+- external links and author metadata inside Office files;
+- diverging copies of the scripts shared between the skills;
+- **blocked terms** (company names, people, etc.).
 
-A lista de termos não fica no código. Ela vem do segredo `SANITIZE_BLOCKLIST` do
-repositório (Settings → Secrets and variables → Actions), uma expressão regular por
-linha. Localmente, use um arquivo `.sanitize-blocklist` na raiz, que o git ignora.
+The list of blocked terms is not stored in the code. It comes from the repository
+secret `SANITIZE_BLOCKLIST` (Settings → Secrets and variables → Actions), one regular
+expression per line. Locally, use a `.sanitize-blocklist` file at the repository root,
+which git ignores.
 
-## Estrutura
+## Layout
 
 ```
-.claude-plugin/marketplace.json        catálogo do plugin
+.claude-plugin/marketplace.json        plugin catalog
 plugins/models-equity-br/
-  .claude-plugin/plugin.json           manifesto
+  .claude-plugin/plugin.json           manifest
   commands/configurar.md               /models-equity-br:configurar
   skills/br-equity-model-builder/      SKILL.md, references/, scripts/, assets/
-  skills/br-infra-equity-model/        idem
-tools/                                 testes e trava de sanitização
+  skills/br-infra-equity-model/        same structure
+tools/                                 tests and sanitization check
 ```
 
-Os scripts `config.py`, `recalc.py`, `ir_importer.py` e `helpers_template.py` existem
-em cópias idênticas nas duas skills, para cada uma funcionar sozinha. Ao alterar um,
-copie para a outra (a trava acusa divergência).
+The scripts `config.py`, `recalc.py`, `ir_importer.py` and `helpers_template.py` exist as
+identical copies in both skills, so each skill works on its own. When you change one,
+copy it to the other (the sanitization check flags any difference).
 
-## Direitos
+## Rights
 
-Todos os direitos reservados. Uso mediante autorização.
+All rights reserved. Use by permission only.
